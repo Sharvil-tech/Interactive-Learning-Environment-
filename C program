@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <unistd.h>
+
+void animatedText(const char *text, int delay) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        printf("%c", text[i]);
+        fflush(stdout);
+        usleep(delay * 1000);
+    }
+    printf("\n");
+}
+
+void askQuestion(const char *question, const char *options[], char correctAnswer) {
+    printf("\n%s\n", question);
+    for (int i = 0; i < 4; i++) {
+        printf("%c. %s\n", 'A' + i, options[i]);
+    }
+    char answer;
+    printf("Your answer: ");
+    scanf(" %c", &answer);
+    if (answer == correctAnswer) {
+        printf("Correct!\n\n");
+    } else {
+        printf("Sorry, the correct answer was %c.\n\n", correctAnswer);
+    }
+}
+
+void quiz() {
+    const char *q1 = "What is the capital of France?";
+    const char *options1[] = {"Berlin", "London", "Paris", "Madrid"};
+    askQuestion(q1, options1, 'C');
+
+    const char *q2 = "Which planet is known as the Red Planet?";
+    const char *options2[] = {"Earth", "Mars", "Jupiter", "Venus"};
+    askQuestion(q2, options2, 'B');
+}
+
+void calculator() {
+    char operator;
+    double num1, num2;
+    printf("\nEnter an operator (+, -, *, /): ");
+    scanf(" %c", &operator);
+    printf("Enter two numbers: ");
+    scanf("%lf %lf", &num1, &num2);
+    switch (operator) {
+        case '+':
+            printf("Result: %.2lf\n\n", num1 + num2);
+            break;
+        case '-':
+            printf("Result: %.2lf\n\n", num1 - num2);
+            break;
+        case '*':
+            printf("Result: %.2lf\n\n", num1 * num2);
+            break;
+        case '/':
+            if (num2 != 0) {
+                printf("Result: %.2lf\n\n", num1 / num2);
+            } else {
+                printf("Error: Division by zero is undefined.\n\n");
+            }
+            break;
+        default:
+            printf("Invalid operator.\n\n");
+    }
+}
+
+void displayClock(int hour, int minute, int second) {
+    printf("\r%02d:%02d:%02d", hour, minute, second);
+    fflush(stdout);
+}
+
+void digitalClock() {
+    int hour = 0, minute = 0, second = 0;
+    printf("\nDigital Clock (Press Ctrl+C to exit):\n");
+    while (1) {
+        displayClock(hour, minute, second);
+        sleep(1);
+        second++;
+        if (second == 60) {
+            second = 0;
+            minute++;
+        }
+        if (minute == 60) {
+            minute = 0;
+            hour++;
+        }
+        if (hour == 24) {
+            hour = 0;
+        }
+    }
+}
+
+int main() {
+    char message[] = "Welcome to the Interactive Learning Environment!";
+    int delay = 100;
+    animatedText(message, delay);
+
+    int choice;
+    while (1) {
+        printf("\n--- Main Menu ---\n");
+        printf("1. Start Quiz\n");
+        printf("2. Calculator\n");
+        printf("3. stopwatch\n");
+        printf("4. Exit\n");
+        printf("Choose an option: ");
+        scanf("%d", &choice);
+        switch (choice) {
+            case 1:
+                quiz();
+                break;
+            case 2:
+                calculator();
+                break;
+            case 3:
+                digitalClock();
+                break;
+            case 4:
+                printf("Exiting the program. Goodbye!\n");
+                return 0;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+    return 0;
+}
