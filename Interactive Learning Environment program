@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Learning Environment</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        h1, h2 {
+            margin: 10px 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: translateY(-3px);
+        }
+
+        .menu, .quiz, .calculator, .clock {
+            display: none;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            margin: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            text-align: center;
+        }
+
+        #clock-display {
+            font-size: 2.5em;
+            margin-top: 20px;
+        }
+
+        .quiz-options button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        #quiz-feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        /* Add responsive design */
+        @media (max-width: 600px) {
+            button {
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+
+            input[type="text"], input[type="number"] {
+                font-size: 1em;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="welcome-message">Welcome to the Interactive Learning Environment!</h1>
+
+        <!-- Main Menu -->
+        <div class="menu">
+            <h2>Main Menu</h2>
+            <button onclick="startQuiz()">Start Quiz</button>
+            <button onclick="openCalculator()">Calculator</button>
+            <button onclick="startClock()">Digital Clock</button>
+            <button onclick="exitProgram()">Exit</button>
+        </div>
+
+        <!-- Quiz -->
+        <div class="quiz">
+            <h2 id="quiz-question"></h2>
+            <div class="quiz-options"></div>
+            <div id="quiz-feedback"></div>
+            <button onclick="returnToMenu()">Return to Menu</button>
+        </div>
+
+        <!-- Calculator -->
+        <div class="calculator">
+            <h2>Calculator</h2>
+            <input type="text" id="calc-operator" placeholder="Enter operator (+, -, *, /)" />
+            <input type="number" id="calc-num1" placeholder="Enter first number" />
+            <input type="number" id="calc-num2" placeholder="Enter second number" />
+            <button onclick="calculate()">Calculate</button>
+            <p id="calc-result"></p>
+            <button onclick="returnToMenu()">Return to Menu</button>
+        </div>
+
+        <!-- Digital Clock -->
+        <div class="clock">
+            <h2>Digital Clock</h2>
+            <div id="clock-display"></div>
+            <button onclick="stopClock()">Stop Clock</button>
+            <button onclick="returnToMenu()">Return to Menu</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuizIndex = 0;
+        let correctAnswer = '';
+        const quizData = [
+            { question: "What is the capital of France?", options: ["Berlin", "London", "Paris", "Madrid"], answer: "C" },
+            { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: "B" },
+        ];
+        let clockInterval;
+
+        // Animated text
+        function animatedText(text, elementId, callback) {
+            const element = document.getElementById(elementId);
+            let index = 0;
+            element.textContent = '';
+            const interval = setInterval(() => {
+                element.textContent += text[index];
+                index++;
+                if (index === text.length) {
+                    clearInterval(interval);
+                    callback();
+                }
+            }, 50);
+        }
+
+        // Welcome message animation
+        window.onload = function () {
+            animatedText("Welcome to the Interactive Learning Environment!", "welcome-message", showMenu);
+        };
+
+        function showMenu() {
+            document.querySelector(".menu").style.display = "block";
+        }
+
+        function startQuiz() {
+            currentQuizIndex = 0;
+            document.querySelector(".menu").style.display = "none";
+            document.querySelector(".quiz").style.display = "block";
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            const quiz = quizData[currentQuizIndex];
+            document.getElementById("quiz-question").textContent = quiz.question;
+            const optionsDiv = document.querySelector(".quiz-options");
+            optionsDiv.innerHTML = '';
+            quiz.options.forEach((option, index) => {
+                const optionButton = document.createElement("button");
+                optionButton.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                optionButton.onclick = () => selectAnswer(String.fromCharCode(65 + index));
+                optionsDiv.appendChild(optionButton);
+            });
+        }
+
+        function selectAnswer(answer) {
+            const quiz = quizData[currentQuizIndex];
+            const feedback = document.getElementById("quiz-feedback");
+            if (answer === quiz.answer) {
+                feedback.textContent = "Correct!";
+                feedback.style.color = "lightgreen";
+            } else {
+                feedback.textContent = `Incorrect! Correct answer: ${quiz.answer}`;
+                feedback.style.color = "red";
+            }
+            currentQuizIndex++;
+            setTimeout(() => {
+                feedback.textContent = '';
+                if (currentQuizIndex < quizData.length) {
+                    loadQuizQuestion();
+                } else {
+                    alert("Quiz Completed!");
+                    returnToMenu();
+                }
+            }, 2000);
+        }
+
+        function openCalculator() {
+            document.querySelector(".menu").style.display = "none";
+            document.querySelector(".calculator").style.display = "block";
+        }
+
+        function calculate() {
+            const operator = document.getElementById("calc-operator").value;
+            const num1 = parseFloat(document.getElementById("calc-num1").value);
+            const num2 = parseFloat(document.getElementById("calc-num2").value);
+            let result = '';
+            switch (operator) {
+                case '+': result = num1 + num2; break;
+                case '-': result = num1 - num2; break;
+                case '*': result = num1 * num2; break;
+                case '/': result = num2 !== 0 ? num1 / num2 : 'Error: Division by zero'; break;
+                default: result = "Invalid operator";
+            }
+            document.getElementById("calc-result").textContent = `Result: ${result}`;
+        }
+
+        function startClock() {
+            document.querySelector(".menu").style.display = "none";
+            document.querySelector(".clock").style.display = "block";
+            clockInterval = setInterval(() => {
+                const now = new Date();
+                document.getElementById("clock-display").textContent = now.toLocaleTimeString();
+            }, 1000);
+        }
+
+        function stopClock() {
+            clearInterval(clockInterval);
+        }
+
+        function returnToMenu() {
+            stopClock();
+            document.querySelector(".quiz").style.display = "none";
+            document.querySelector(".calculator").style.display = "none";
+            document.querySelector(".clock").style.display = "none";
+            document.querySelector(".menu").style.display = "block";
+        }
+
+        function exitProgram() {
+            alert("Goodbye!");
+            window.close();
+        }
+    </script>
+</body>
+</html>
